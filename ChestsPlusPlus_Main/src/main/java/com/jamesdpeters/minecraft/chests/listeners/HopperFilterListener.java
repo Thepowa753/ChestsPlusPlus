@@ -47,7 +47,7 @@ public class HopperFilterListener implements Listener {
             event.setCancelled(!isFilteredItem.apply(event.getItem()));
 
             // Item shouldn't be allowed
-            if (event.isCancelled() && ServerType.getType() == ServerType.Type.PAPER) {
+            if (event.isCancelled() && ServerType.isPaperLike()) {
                 int index = event.getSource().first(event.getItem());
                 int hopperAmount = SpigotConfig.getWorldSettings(event.getSource().getLocation()).getHopperAmount();
 

@@ -16,9 +16,15 @@ public class VersionMatcher {
             this.put("1.20.5", "v1_20_R4");
             this.put("1.20.6", "v1_20_R4");
             this.put("1.21", "v1_21_R1");
+            this.put("1.21.1", "v1_21_R1");
+            this.put("1.21.2", "v1_21_R1");
+            this.put("1.21.3", "v1_21_R1");
+            this.put("1.21.4", "v1_21_R1");
+            this.put("1.21.5", "v1_21_R1");
+            this.put("1.21.6", "v1_21_R1");
         }
     };
-    private static final String FALLBACK_REVISION = "v1_20_R1";
+    private static final String FALLBACK_REVISION = "v1_21_R1";
 
     public static String match() {
         String craftBukkitPackage = Bukkit.getServer().getClass().getPackage().getName();
