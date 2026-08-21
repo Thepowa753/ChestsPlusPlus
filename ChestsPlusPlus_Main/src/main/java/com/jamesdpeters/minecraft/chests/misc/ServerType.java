@@ -16,6 +16,10 @@ public class ServerType {
     @Getter
     private static Type type;
 
+    public static boolean isPaperLike() {
+        return getType() == Type.PAPER;
+    }
+
     public static void init() {
         //Default to Bukkit.
         type = Type.BUKKIT;
@@ -26,12 +30,21 @@ public class ServerType {
             type = Type.SPIGOT;
         } catch (Exception ignored){}
 
-        try {
-            Class.forName("com.destroystokyo.paper.VersionHistoryManager$VersionData");
-            // If reached here class exists
+        if (classExists("com.destroystokyo.paper.VersionHistoryManager$VersionData") ||
+                classExists("io.papermc.paper.configuration.Configuration") ||
+                classExists("org.purpurmc.purpur.PurpurConfig")) {
             type = Type.PAPER;
-        } catch (Exception ignored){}
+        }
 
         ChestsPlusPlus.PLUGIN.getLogger().info("Detected Server Type: "+getType());
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }
