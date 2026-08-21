@@ -30,6 +30,7 @@ public class ChestLinkCommand extends ServerCommand {
         HELP("/chestlink help", Message.COMMAND_HELP.getString()),
         LIST("/chestlink list", Message.COMMAND_CHESTLINK_LIST.getString()),
         MEMBER("/chestlink member [add/remove <group> <player>] or [list <group>]", Message.COMMAND_MEMBER.getString()),
+        ALL_PUBLIC("/chestlink all-public", "Toggle public access for all of your ChestLinks."),
         MENU("/chestlink menu", Message.COMMAND_CHESTLINK_MENU.getString()),
         OPEN("/chestlink open <Group>", Message.COMMAND_CHESTLINK_OPEN.getString()),
         PARTY("/chestlink party", Message.COMMAND_PARTY.getString()),
@@ -52,7 +53,7 @@ public class ChestLinkCommand extends ServerCommand {
 
         @Override
         public String toString() {
-            return super.toString().toLowerCase();
+            return super.toString().toLowerCase().replace("_", "-");
         }
 
     }
@@ -71,7 +72,7 @@ public class ChestLinkCommand extends ServerCommand {
 
         if (args != null && args.length > 0) {
             try {
-                switch (OPTIONS.valueOf(args[0].toUpperCase())) {
+                switch (OPTIONS.valueOf(args[0].toUpperCase().replace("-", "_"))) {
                     case HELP:
                         for (OPTIONS option : OPTIONS.values()) {
                             if (!option.equals(OPTIONS.HELP)) {
@@ -163,6 +164,14 @@ public class ChestLinkCommand extends ServerCommand {
                         }
                     case MEMBER:
                         return memberCommand(args, sender);
+                    case ALL_PUBLIC: {
+                        var storageMap = Config.getChestLink().getStorageMap(player.getUniqueId());
+                        boolean makePublic = !storageMap.values().stream().allMatch(ChestLinkStorage::isPublic);
+                        storageMap.values().forEach(storage -> storage.setPublic(makePublic));
+                        player.sendMessage(ChatColor.GREEN + "[Chests++] Set all ChestLinks public: " + ChatColor.WHITE + makePublic);
+                        Config.saveASync();
+                        return true;
+                    }
                     case SETPUBLIC: {
                         if (args.length > 2) {
                             ChestLinkStorage storage = Config.getChestLink().getStorage(player.getUniqueId(), args[1]);
@@ -212,7 +221,7 @@ public class ChestLinkCommand extends ServerCommand {
             }
             if (args.length == 2) {
                 try {
-                    switch (OPTIONS.valueOf(args[0].toUpperCase())) {
+                    switch (OPTIONS.valueOf(args[0].toUpperCase().replace("-", "_"))) {
                         case ADD:
                         case OPEN:
                             return Config.getChestLink().getOpenableStorageList(player, args[1]);
@@ -228,7 +237,7 @@ public class ChestLinkCommand extends ServerCommand {
             }
             if (args.length == 3) {
                 try {
-                    switch (OPTIONS.valueOf(args[0].toUpperCase())) {
+                    switch (OPTIONS.valueOf(args[0].toUpperCase().replace("-", "_"))) {
                         case MEMBER:
                             if (args[1].equals("add-to-all")) return Utils.filterList(Utils.getAllPlayers(), args[2]);
                             if (args[1].equals("remove-from-all"))
@@ -242,7 +251,7 @@ public class ChestLinkCommand extends ServerCommand {
             }
             if (args.length == 4) {
                 try {
-                    switch (OPTIONS.valueOf(args[0].toUpperCase())) {
+                    switch (OPTIONS.valueOf(args[0].toUpperCase().replace("-", "_"))) {
                         case MEMBER:
                             return Utils.filterList(Utils.getAllPlayers(), args[3]);
                     }
