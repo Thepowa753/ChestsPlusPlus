@@ -5,7 +5,6 @@ import com.jamesdpeters.minecraft.chests.ChestsPlusPlus;
 import com.jamesdpeters.minecraft.chests.misc.Messages;
 import com.jamesdpeters.minecraft.chests.misc.Utils;
 import com.jamesdpeters.minecraft.chests.Values;
-import com.jamesdpeters.minecraft.chests.party.PartyUtils;
 import com.jamesdpeters.minecraft.chests.serialize.Config;
 import com.jamesdpeters.minecraft.chests.serialize.ConfigStorage;
 import com.jamesdpeters.minecraft.chests.serialize.LocationInfo;
@@ -145,12 +144,8 @@ public abstract class StorageType<T extends AbstractStorage> implements Listener
 
     public List<T> getStorageMemberOf(Player player) {
         return getMap().entrySet().stream().flatMap(map -> map.getValue().values().stream().filter(storage -> {
-            if (PartyUtils.getPlayerPartyStorage(storage.getOwner()).getOwnedPartiesCollection().stream().anyMatch(party -> party.isMember(player))) return true; // Uses party to match.
-
-            if (storage.isPublic()) return false;
             if (storage.getOwner().getUniqueId().equals(player.getUniqueId())) return false;
-            if (storage.getMembers() == null) return false;
-            return storage.getMembers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()));
+            return storage.hasPermission((OfflinePlayer) player);
         })).collect(Collectors.toList());
     }
 
@@ -189,10 +184,13 @@ public abstract class StorageType<T extends AbstractStorage> implements Listener
 
     public T getStorage(Player member, String playerChestID) {
         if (playerChestID.contains(":")) {
-            String[] args = playerChestID.split(":");
+            String[] args = playerChestID.split(":", 2);
             String playerName = args[0];
             String chestlinkID = args[1];
-            Optional<T> storage = getStorageMemberOf(member).stream().filter(store -> store.getOwner().getName().equals(playerName) && store.getIdentifier().equals(chestlinkID)).findFirst();
+            Optional<T> storage = getStorageMemberOf(member).stream().filter(store -> {
+                String ownerName = store.getOwner().getName();
+                return ownerName != null && ownerName.equalsIgnoreCase(playerName) && store.getIdentifier().equals(chestlinkID);
+            }).findFirst();
             if (storage.isPresent()) return storage.get();
         }
         return null;
